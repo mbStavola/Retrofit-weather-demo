@@ -6,10 +6,9 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -22,8 +21,6 @@ import retrofit.Response;
 import retrofit.Retrofit;
 
 public class MainActivity extends AppCompatActivity {
-    private TextView textView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,8 +28,14 @@ public class MainActivity extends AppCompatActivity {
 
         setUpToolbar();
         setUpFab();
+    }
 
-        textView = (TextView) findViewById(R.id.resulttext);
+    private void setupView(WeatherAPIResult result) {
+        final TextView textView = (TextView) findViewById(R.id.resulttext);
+
+        //Just turn the result into a string and set the Textview
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        textView.setText(gson.toJson(result));
     }
 
     private void setUpToolbar() {
@@ -55,14 +58,14 @@ public class MainActivity extends AppCompatActivity {
                 call.enqueue(new Callback<WeatherAPIResult>() {
                     @Override
                     public void onResponse(Response<WeatherAPIResult> response, Retrofit retrofit) {
-                        if(response.isSuccess()) {
+                        if (response.isSuccess()) {
                             //Handle the received weather data here
                             WeatherAPIResult result = response.body();
-                            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                            textView.setText(gson.toJson(result));
+                            setupView(result);
                         } else {
                             Log.e("MainActivity", "Response received but request not successful. Response: " + response.raw());
-                            textView.setText("Response received but request not successful. Response: " + response.raw());
+
+                            Toast.makeText(MainActivity.this, "Response Unsuccessful", Toast.LENGTH_SHORT).show();
                         }
                     }
 
